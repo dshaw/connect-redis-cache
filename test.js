@@ -4,57 +4,36 @@
  */
 
 var assert = require('assert')
-  , RedisStore = require('./');
+  , connect = require('connect')
+  , cache = require('./')
+  , http = require('http');
 
-var store = new RedisStore;
-var store_alt = new RedisStore({ db: 15 });
 
-store.client.on('connect', function(){
-  // #set()
-  store.set('123', { cookie: { maxAge: 2000 }, name: 'tj' }, function(err, ok){
+/**
+ * Server
+ */
+
+var server = connect.createServer(cache());
+
+server.use('/', function(req, res) {
+  var value = { value: 1};
+
+  req.cache.set('key', value, { maxAge: -1 }, function(err, ok) {
     assert.ok(!err, '#set() got an error');
     assert.ok(ok, '#set() is not ok');
-    
-    // #get()
-    store.get('123', function(err, data){
+    console.log(err, ok);
+
+    req.cache.get('key', true, function(err, data) {
       assert.ok(!err, '#get() got an error');
-      assert.deepEqual({ cookie: { maxAge: 2000 }, name: 'tj' }, data);
-  
-      // #length()
-      store.length(function(err, len){
-        assert.ok(!err, '#length() got an error');
-        assert.equal(1, len, '#length() with keys');
+      assert.deepEqual(value, data);
+      console.dir(data);
 
-        // #db option
-        store_alt.length(function (err, len) {
-          assert.ok(!err, '#alt db got an error');
-          assert.equal(0, len, '#alt db with keys'); 
-
-          // #clear()
-          store.clear(function(err, ok){
-            assert.ok(!err, '#clear()');
-            assert.ok(ok, '#clear()');
-
-            // #length()
-            store.length(function(err, len){
-              assert.ok(!err, '#length()');
-              assert.equal(0, len, '#length() without keys');
-
-              // #set null
-              store.set('123', { cookie: { maxAge: 2000 }, name: 'tj' }, function(){
-                store.destroy('123', function(){
-                  store.length(function(err, len){
-                   assert.equal(0, len, '#set() null');
-                   console.log('done');
-                   store.client.end(); 
-                   store_alt.client.end();
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
-    })
+      res.end(JSON.stringify(data));
+    });
   });
+
+  res.end('done');
 });
+
+server.listen(3000);
+console.log('Connect server listening on port 3000');

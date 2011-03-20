@@ -1,15 +1,14 @@
 
-# Connect Redis
+# Redis Cache
 
-connect-redis is a Redis session store backed by [node_redis](http://github.com/mranney/node_redis), and is insanely fast :). Requires redis >= `1.3.10` for the _SETEX_ command.
-
- connect-redis `>= 1.0.0` support only connect `>= 1.0.0`.
+redis-cache is a high speed Redis cache middleware backed by [node_redis](http://github.com/mranney/node_redis).
+Requires redis >= `1.3.10` for the _SETEX_ command.
 
 ## Installation
 
 via npm:
 
-	  $ npm install connect-redis
+	  $ npm install .
 
 ## Options
 
@@ -20,11 +19,6 @@ via npm:
 
 ## Example
 
-    var connect = require('connect')
-	 	  , RedisStore = require('connect-redis');
+    var cache = require('redis-cache');
 
-    connect.createServer(
-      connect.cookieDecoder(),
-      // 5 minutes
-      connect.session({ store: new RedisStore })
-    );
+    connect.createServer(cache());

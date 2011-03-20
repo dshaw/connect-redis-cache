@@ -1,2 +1,2 @@
 
-module.exports = require('./lib/connect-redis');
+module.exports = require('./lib/redis-cache');
